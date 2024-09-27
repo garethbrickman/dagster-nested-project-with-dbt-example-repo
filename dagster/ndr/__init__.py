@@ -2,13 +2,13 @@ from dagster import (
     Definitions,
     load_assets_from_package_module,
 )
+from dagster_dbt import DbtCliResource
+from .assets import ndr_dbt_assets
+from .project import ndr_project
 
-from . import assets
-
-# Load assets from the 'assets' module
-loaded_assets = load_assets_from_package_module(assets)
-
-# Define the Dagster Definitions
 defs = Definitions(
-    assets=loaded_assets,
+    assets=[ndr_dbt_assets],
+    resources={
+        "dbt": DbtCliResource(project_dir=ndr_project),
+    },
 )
