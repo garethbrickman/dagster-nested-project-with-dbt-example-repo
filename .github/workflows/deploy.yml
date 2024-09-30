@@ -47,12 +47,8 @@ jobs:
         run: |
           cd project-repo
           ls -lah
-          mkdir tmp_dagster
           shopt -s dotglob
-          mv dagster/* tmp_dagster
-          rm -rf dagster
-          mv tmp_dagster/* .
-          rm -rf tmp_dagster
+          mv dagster/* .
           ls -lah
           cd ..
 
