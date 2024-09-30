@@ -8,6 +8,7 @@ setup(
             "dbt-project/**/*",
         ],
     },
+    python_requires='>=3.8',
     install_requires=[
         "dagster",
         "dagster-cloud",
@@ -16,6 +17,7 @@ setup(
         "pandas",
         "matplotlib",
         "dbt-duckdb<1.9",
+        "protobuf>=5.26.1"
     ],
     extras_require={"dev": ["dagster-webserver", "pytest"]},
 )
