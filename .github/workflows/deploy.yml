@@ -4,7 +4,7 @@ on:
     branches:
       - "main"
       - "master"
-    
+
 concurrency:
   # Cancel in-progress deploys to same branch
   group: ${{ github.ref }}/deploy
@@ -12,9 +12,9 @@ concurrency:
 env:
   DAGSTER_CLOUD_URL: "http://gary-dagster-test.dagster.cloud"
   DAGSTER_CLOUD_API_TOKEN: ${{ secrets.DAGSTER_CLOUD_API_TOKEN }}
-  ENABLE_FAST_DEPLOYS: 'true'
-  PYTHON_VERSION: '3.8'
-  DAGSTER_CLOUD_FILE: 'dagster_cloud.yaml'
+  ENABLE_FAST_DEPLOYS: "true"
+  PYTHON_VERSION: "3.8"
+  DAGSTER_CLOUD_FILE: "dagster_cloud.yaml"
 
 jobs:
   dagster_cloud_default_deploy:
@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-20.04
     outputs:
       build_info: ${{ steps.parse-workspace.outputs.build_info }}
-    
+
     steps:
       - name: Prerun Checks
         id: prerun
@@ -41,7 +41,34 @@ jobs:
         with:
           ref: ${{ github.head_ref }}
           path: project-repo
-          
+
+      - name: Move Dagster folder to root
+        if: steps.prerun.outputs.result == 'pex-deploy'
+        run: |
+          cd project-repo
+          ls -lah
+          mkdir tmp_dagster
+          shopt -s dotglob
+          mv dagster/* tmp_dagster
+          rm -rf dagster
+          mv tmp_dagster/* .
+          rm -rf tmp_dagster
+          ls -lah
+          cd ..
+
+      - name: Prepare DBT project for deployment
+        if:
+          steps.prerun.outputs.result == 'pex-deploy'
+          # --upgrade-strategy eager picks up newer packages that are required for things to work
+        run: |
+          pip install pip --upgrade
+          cd project-repo
+          pip install . --upgrade --upgrade-strategy eager
+          dagster-dbt project prepare-for-deployment --file dagster/ndr/project.py
+          # The cli command below can be used to manage syncing the prod manifest to branches if state_path is set on the DbtProject
+          # dagster-cloud ci dagster-dbt project manage-state --file dagster/ndr/project.py
+        shell: bash
+
       - name: Python Executable Deploy
         if: steps.prerun.outputs.result == 'pex-deploy'
         uses: dagster-io/dagster-cloud-action/actions/build_deploy_python_executable@v0.1
@@ -77,4 +104,3 @@ jobs:
           organization_id: ${{ secrets.ORGANIZATION_ID }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
