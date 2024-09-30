@@ -12,7 +12,6 @@ setup(
         "dagster",
         "dagster-cloud",
         "dagster-dbt",
-        "boto3",
         "pandas",
         "matplotlib",
         "dbt-duckdb<1.9",
