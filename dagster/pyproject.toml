@@ -3,4 +3,5 @@ requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [tool.dagster]
-module_name = "ndr"
+module_name = "ndr.definitions"
+code_location_name = "ndr-dagster"
